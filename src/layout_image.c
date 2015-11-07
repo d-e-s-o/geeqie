@@ -301,6 +301,18 @@ static void li_pop_menu_edit_cb(GtkWidget *widget, gpointer data)
 	file_util_start_editor_from_file(key, layout_image_get_fd(lw), lw->window);
 }
 
+static void li_pop_memu_save_as_png_cb(GtkWidget *widget, gpointer data)
+{
+	LayoutWindow *lw = data;
+	ImageWindow *imd = lw->image;
+
+	/*
+	 * TODO: We should update the image view afterwards to have the new
+	 *       image listed properly.
+	 */
+	image_save_as_png(imd);
+}
+
 static void li_pop_menu_wallpaper_cb(GtkWidget *widget, gpointer data)
 {
 	LayoutWindow *lw = data;
@@ -504,6 +516,8 @@ static GtkWidget *layout_image_pop_menu(LayoutWindow *lw)
 
 	menu_item_add_divider(menu);
 
+	item = menu_item_add_stock(menu, _("_Save as png"), GTK_STOCK_SAVE, G_CALLBACK(li_pop_memu_save_as_png_cb), lw);
+	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	item = menu_item_add_stock(menu, _("_Copy..."), GTK_STOCK_COPY, G_CALLBACK(li_pop_menu_copy_cb), lw);
 	if (!path) gtk_widget_set_sensitive(item, FALSE);
 	item = menu_item_add(menu, _("_Move..."), G_CALLBACK(li_pop_menu_move_cb), lw);

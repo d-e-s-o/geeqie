@@ -13,7 +13,9 @@
 #include "view_file.h"
 
 #include "editors.h"
+#include "image.h"
 #include "layout.h"
+#include "layout_image.h"
 #include "menu.h"
 #include "thumb.h"
 #include "ui_menu.h"
@@ -346,6 +348,35 @@ static void vf_pop_menu_view_cb(GtkWidget *widget, gpointer data)
 	}
 }
 
+static gboolean vf_is_current_selection_displayed(ViewFile *vf)
+{
+	GList *list;
+	gboolean result = FALSE;
+
+	list = vflist_pop_menu_file_list(vf);
+	if (g_list_length(list) == 1)
+	{
+		FileData *sel_fd = g_list_first(list)->data;
+		FileData *displayed_fd = layout_image_get_fd(vf->layout);
+
+		result = sel_fd == displayed_fd;
+	}
+	filelist_free(list);
+	return result;
+}
+
+static void vf_pop_menu_save_as_png_cb(GtkWidget *widget, gpointer data)
+{
+	ViewFile *vf = data;
+
+	g_assert(vf_is_current_selection_displayed(vf));
+	/*
+	 * TODO: We should update the image view afterwards to have the new
+	 *       image listed properly.
+	 */
+	image_save_as_png(vf->layout->image);
+}
+
 static void vf_pop_menu_copy_cb(GtkWidget *widget, gpointer data)
 {
 	ViewFile *vf = data;
@@ -517,6 +548,7 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 	GtkWidget *item;
 	GtkWidget *submenu;
 	gboolean active = FALSE;
+	gboolean displayed = vf_is_current_selection_displayed(vf);
 
 	switch (vf->type)
 	{
@@ -589,6 +621,13 @@ GtkWidget *vf_pop_menu(ViewFile *vf)
 				      G_CALLBACK(vf_pop_menu_view_cb), vf);
 
 	menu_item_add_divider(menu);
+	/*
+	 * We only allow exporting of a single item -- the selected one.
+	 * The reason is that the image must be displayed currently in
+	 * order for the pixel data to be available.
+	 */
+	menu_item_add_stock_sensitive(menu, _("_Save as png"), GTK_STOCK_SAVE, active && displayed,
+				      G_CALLBACK(vf_pop_menu_save_as_png_cb), vf);
 	menu_item_add_stock_sensitive(menu, _("_Copy..."), GTK_STOCK_COPY, active,
 				      G_CALLBACK(vf_pop_menu_copy_cb), vf);
 	menu_item_add_sensitive(menu, _("_Move..."), active,
