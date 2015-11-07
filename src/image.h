@@ -150,6 +150,9 @@ void image_set_image_as_tiles(ImageWindow *imd, gint width, gint height,
 /* reset default options */
 void image_options_sync(void);
 
+/* export to png */
+void image_save_as_png(ImageWindow *imd);
+
 
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
