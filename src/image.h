@@ -152,5 +152,8 @@ void image_options_sync(void);
 
 void image_get_rectangle(gint *x1, gint *y1, gint *x2, gint *y2);
 
+/* export to png */
+void image_save_as_png(ImageWindow *imd);
+
 #endif
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */

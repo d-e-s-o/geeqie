@@ -35,6 +35,7 @@
 #include "editors.h"
 #include "filedata.h"
 #include "history_list.h"
+#include "image.h"
 #include "image-overlay.h"
 #include "histogram.h"
 #include "img-view.h"
@@ -331,6 +332,18 @@ static void layout_menu_dir_cb(GtkAction *action, gpointer data)
 	LayoutWindow *lw = data;
 
 	if (lw->vd) vd_new_folder(lw->vd, lw->dir_fd);
+}
+
+static void layout_menu_save_as_png_cb(GtkAction *action, gpointer data)
+{
+	LayoutWindow *lw = data;
+	ImageWindow *imd = lw->image;
+
+	/*
+	 * TODO: We should update the image view afterwards to have the new
+	 *       image listed properly.
+	 */
+	image_save_as_png(imd);
 }
 
 static void layout_menu_copy_cb(GtkAction *action, gpointer data)
@@ -1898,6 +1911,7 @@ static GtkActionEntry menu_entries[] = {
   { "PanView",	PIXBUF_INLINE_ICON_PANORAMA,	N_("Pa_n view"),			"<control>J",		N_("Pan view"),				CB(layout_menu_pan_cb) },
   { "Print",		GTK_STOCK_PRINT,	N_("_Print..."),			"<shift>P",		N_("Print..."),				CB(layout_menu_print_cb) },
   { "NewFolder",	GTK_STOCK_DIRECTORY,	N_("N_ew folder..."),			"<control>F",		N_("New folder..."),			CB(layout_menu_dir_cb) },
+  { "Png",		GTK_STOCK_SAVE,		N_("_Save as png"),			"<control>S",		N_("Save as png"),			CB(layout_menu_save_as_png_cb) },
   { "Copy",		GTK_STOCK_COPY,		N_("_Copy..."),				"<control>C",		N_("Copy..."),				CB(layout_menu_copy_cb) },
   { "Move",	PIXBUF_INLINE_ICON_MOVE,			N_("_Move..."),				"<control>M",		N_("Move..."),				CB(layout_menu_move_cb) },
   { "Rename",	PIXBUF_INLINE_ICON_RENAME,	N_("_Rename..."),			"<control>R",		N_("Rename..."),			CB(layout_menu_rename_cb) },
@@ -2088,6 +2102,7 @@ static const gchar *menu_ui_description =
 "      <placeholder name='PrintSection'/>"
 "      <separator/>"
 "      <menuitem action='NewFolder'/>"
+"      <menuitem action='Png'/>"
 "      <menuitem action='Copy'/>"
 "      <menuitem action='Move'/>"
 "      <menuitem action='Rename'/>"

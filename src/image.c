@@ -36,6 +36,7 @@
 #include "pixbuf-renderer.h"
 #include "pixbuf_util.h"
 #include "ui_fileops.h"
+#include "utilops.h"
 
 #include "filedata.h"
 #include "filecache.h"
@@ -2199,4 +2200,53 @@ void image_get_rectangle(gint *x1, gint *y1, gint *x2, gint *y2)
 	*y2 = rect_y2;
 }
 
+#define image_show_error_message(parent, ...)							\
+	{											\
+		gchar *text = g_strdup_printf(__VA_ARGS__);					\
+		file_util_warning_dialog(_("Error"), text, GTK_STOCK_DIALOG_ERROR, parent);	\
+		g_free(text);									\
+	}
+
+void image_save_as_png(ImageWindow *imd)
+{
+	const gchar const png_ext[] = ".png";
+	GdkPixbuf *pixbuf;
+	gchar const *path;
+	gchar *png_path;
+	gboolean result;
+	size_t size;
+
+	path = image_get_path(imd);
+	g_assert(path != NULL);
+
+	size = strlen(path);
+	png_path = malloc(size + sizeof(png_ext) + 1 /* NULL byte */);
+	if (png_path == NULL)
+	{
+		image_show_error_message(imd->widget, "%s", "Allocating memory for path failed.");
+		return;
+	}
+
+	memcpy(png_path, path, size);
+	memcpy(png_path + size, png_ext, sizeof(png_ext) /* Includes NULL byte. */);
+
+	if (access_file(png_path, F_OK))
+	{
+		/* The file already exists. */
+		/*
+		 * TODO: We could use some more elaborate handling here but for now
+		 *       we just bail out.
+		 */
+		image_show_error_message(imd->widget, "The file %s already exists.", png_path);
+		goto out;
+	}
+	pixbuf = image_get_pixbuf(imd);
+	result = pixbuf_to_file_as_png(pixbuf, png_path);
+
+	if (!result)
+		image_show_error_message(imd->widget, "Failed to save png: %s", png_path);
+
+out:
+	free(png_path);
+}
 /* vim: set shiftwidth=8 softtabstop=0 cindent cinoptions={1s: */
